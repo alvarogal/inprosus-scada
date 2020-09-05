@@ -8,7 +8,12 @@ var app = express();
 app.use(express.urlencoded())
 
 //Establish the server
-var server = app.listen(8080, function() {
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
+
+var server = app.listen(port, function() {
 	var host = server.address().address
 	var port = server.address().port
 	console.log("app listening at %s:%s Port", host, port)
