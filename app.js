@@ -106,8 +106,8 @@ app.get('/grafica', function(req, res) {
     	
     	tiempoF.setTime(csvData[count][1]);
     	do{	
-    		chartData.unshift('{x: ' + csvData[count][1] + ", y: " + csvData[count][0] + '}');
     		tiempoI.setTime(csvData[count][1]);
+    		chartData.unshift('{x: ' + tiempoI.getUTCMinutes() + ", y: " + csvData[count][0] + '}');
     		count = count - 1;
 
     		
