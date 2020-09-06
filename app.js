@@ -72,7 +72,7 @@ app.post('/posted', function(req, res) {
 	dato = parseInt(req.body.valor);
 	
 	//convertimos al tiempo colombiano manteniendo la referencia UTC
-	//tiempo.setTime(tiempo.getTime() - tiempo.getTimezoneOffset()*60*1000)
+	tiempo.setTime(tiempo.getTime() - 5*60*60*1000)
 	fs.writeFile("assets/datos.csv", '\n' + dato + ';' + tiempo.getTime(), { flag: "a" }, ()=>{
 		console.log("Este es el dato: " + dato)
 	});
