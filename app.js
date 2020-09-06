@@ -72,7 +72,7 @@ app.post('/posted', function(req, res) {
 	dato = parseInt(req.body.valor);
 	
 	//convertimos al tiempo colombiano manteniendo la referencia UTC
-	tiempo.setTime(tiempo.getTime() - tiempo.getTimezoneOffset()*60*1000)
+	//tiempo.setTime(tiempo.getTime() - tiempo.getTimezoneOffset()*60*1000)
 	fs.writeFile("assets/datos.csv", '\n' + dato + ';' + tiempo.getTime(), { flag: "a" }, ()=>{
 		console.log("Este es el dato: " + dato)
 	});
@@ -105,14 +105,15 @@ app.get('/grafica', function(req, res) {
     	var count = csvData.length-1;
     	
     	tiempoF.setTime(csvData[count][1]);
-    	do{	
-    		tiempoI.setTime(csvData[count][1]);
+    	tiempoI.setTime(csvData[count][1]);
+    	while((tiempoF.getHours() - tiempoI.getHours() < 4 ) && count > 0){
     		chartData.unshift('{t: new Date("'+ 
-    			tiempoI.toJSON().replace("T", " ").replace("Z", "").substr(0, 16) + 
+    			tiempoI.toJSON().replace("T", " ").replace("Z", "").substr(0, 19) + 
     			'")' +
     			",y: " + csvData[count][0] + '}');
-    		count = count - 1;    		
-    	}while((tiempoF.getHours() - tiempoI.getHours() < 4 ) && count > 0);
+    		count = count - 1;
+    		tiempoI.setTime(csvData[count][1]); 		
+    	}
     });
 
 
