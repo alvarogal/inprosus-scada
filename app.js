@@ -107,10 +107,11 @@ app.get('/grafica', function(req, res) {
     	tiempoF.setTime(csvData[count][1]);
     	do{	
     		tiempoI.setTime(csvData[count][1]);
-    		chartData.unshift('{x: ' + tiempoI.getTime()/1000 + ", y: " + csvData[count][0] + '}');
-    		count = count - 1;
-
-    		
+    		chartData.unshift('{t: new Date("'+ 
+    			tiempoI.toJSON().replace("T", " ").replace("Z", "").substr(0, 16) + 
+    			'")' +
+    			",y: " + csvData[count][0] + '}');
+    		count = count - 1;    		
     	}while((tiempoF.getHours() - tiempoI.getHours() < 4 ) && count > 0);
     });
 
