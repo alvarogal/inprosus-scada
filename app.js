@@ -69,7 +69,7 @@ app.post('/posted', function(req, res) {
 	var tiempo = new Date();
 
 	//we take the filter substring from filterText input text from form
-	dato = req.body.valor;
+	dato = parseInt(req.body.valor);
 	
 	//convertimos al tiempo colombiano manteniendo la referencia UTC
 	tiempo.setTime(tiempo.getTime() - tiempo.getTimezoneOffset()*60*1000)
