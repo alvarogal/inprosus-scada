@@ -106,7 +106,7 @@ app.get('/grafica', function(req, res) {
     	
     	tiempoF.setTime(csvData[count][1]);
     	tiempoI.setTime(csvData[count][1]);
-    	while((tiempoF.getHours() - tiempoI.getHours() < 4 ) && count > 0){
+    	while((tiempoF.getTime() - tiempoI.getTime() < 4*3600000 ) && count > 0){
     		chartData.unshift('{t: new Date("'+ 
     			tiempoI.toJSON().replace("T", " ").replace("Z", "").substr(0, 19) + 
     			'")' +
