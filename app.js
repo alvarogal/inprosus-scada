@@ -3,11 +3,33 @@ var express = require('express')
 var fs = require('fs')
 const path = require('path');
 const csv = require('@fast-csv/parse');
+const { Client } = require('pg');
 //var parse = require('@fast-csv/parse')
+
+//Conexion a la DB
+const client = new Client({
+  //connectionString: process.env.DATABASE_URL || 'postgresql://postgres:a1221pg3@localhost:5432/postgresql-metric-96670',
+  ssl: {
+    rejectUnauthorized: false
+  }
+  ssl: process.env.DATABASE_URL ? true : false
+});
+
+client.connect();
+
+//Prueba para ver
+client.query('SELECT * FROM datosturbidez;', (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(JSON.stringify(row));
+  }
+  client.end();
+});
+
+//Establish the server
 var app = express();
 app.use(express.urlencoded())
 
-//Establish the server
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 8000;

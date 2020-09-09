@@ -13,6 +13,7 @@
     "@fast-csv/parse": "^4.3.2",
     "body-parser": "^1.19.0",
     "chart.js": "^2.9.3",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "pg": "^8.3.3"
   }
 }
