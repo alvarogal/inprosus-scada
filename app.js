@@ -8,11 +8,11 @@ const { Client } = require('pg');
 
 //Conexion a la DB
 const client = new Client({
-  //connectionString: process.env.DATABASE_URL || 'postgresql://postgres:a1221pg3@localhost:5432/postgresql-metric-96670',
+  connectionString: process.env.DATABASE_URL, //| 'postgresql://postgres:a1221pg3@localhost:5432/postgresql-metric-96670',
   ssl: {
     rejectUnauthorized: false
   }
-  ssl: process.env.DATABASE_URL ? true : false
+  //ssl: process.env.DATABASE_URL ? true : false
 });
 
 client.connect();
