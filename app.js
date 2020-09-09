@@ -50,6 +50,15 @@ app.get('/', function(req, res) {
 		res.write(data);
 		res.end();
 	});
+
+	client.connect();
+	client.query('SELECT * FROM datosturbidez;', (err, res) => {
+	  if (err) throw err;
+	  for (let row of res.rows) {
+	    console.log(JSON.stringify(row));
+	  }
+	  client.end();
+	});
 });
 
 //Define actions to take when user click submit
@@ -95,8 +104,20 @@ app.post('/posted', function(req, res) {
 	
 	//convertimos al tiempo colombiano manteniendo la referencia UTC
 	tiempo.setTime(tiempo.getTime() - 5*60*60*1000)
+
+	//escribo al CSV
 	fs.writeFile("assets/datos.csv", '\n' + dato + ';' + tiempo.getTime(), { flag: "a" }, ()=>{
 		console.log("Este es el dato: " + dato)
+	});
+
+	//escribo a la DB
+	client.connect();
+	client.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
+		dato + ',' + tiempo.getTime() +
+		');', (err, res) => {
+	  if (err) throw err;
+	  //console.log(res);
+	  client.end();
 	});
 
 	//write the response taking the lines that have 
