@@ -23,7 +23,7 @@ client.query('SELECT * FROM datosturbidez;', (err, res) => {
   for (let row of res.rows) {
     console.log(JSON.stringify(row));
   }
-  client.end();
+  //client.end();
 });
 
 //Establish the server
@@ -51,13 +51,13 @@ app.get('/', function(req, res) {
 		res.end();
 	});
 
-	client.connect();
+	//client.connect();
 	client.query('SELECT * FROM datosturbidez;', (err, res) => {
 	  if (err) throw err;
 	  for (let row of res.rows) {
 	    console.log(JSON.stringify(row));
 	  }
-	  client.end();
+	  //client.end();
 	});
 });
 
@@ -111,13 +111,13 @@ app.post('/posted', function(req, res) {
 	});
 
 	//escribo a la DB
-	client.connect();
+	//client.connect();
 	client.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
 		dato + ',' + tiempo.getTime() +
 		');', (err, res) => {
 	  if (err) throw err;
 	  //console.log(res);
-	  client.end();
+	  //client.end();
 	});
 
 	//write the response taking the lines that have 
