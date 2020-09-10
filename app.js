@@ -167,9 +167,9 @@ app.get('/grafica', function(req, res) {
 		if (err) throw err;
 		for (let row of res.rows) {
 			console.log(row);
-			chartData.unshift('{t: new Date("'+ 
+			chartData.unshift('{t: new Date('+ 
     			row.tiempo + 
-    			'")' +
+    			')' +
     			",y: " + row.valor + '}');
  		}
 	});
