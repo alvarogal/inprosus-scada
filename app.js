@@ -18,6 +18,7 @@ const client = new Client({
 client.connect();
 
 //Prueba para ver
+/*
 client.query('SELECT * FROM datosturbidez;', (err, res) => {
   if (err) throw err;
   for (let row of res.rows) {
@@ -25,6 +26,7 @@ client.query('SELECT * FROM datosturbidez;', (err, res) => {
   }
   //client.end();
 });
+*/
 
 //Establish the server
 var app = express();
@@ -49,15 +51,6 @@ app.get('/', function(req, res) {
 		});
 		res.write(data);
 		res.end();
-	});
-
-	//client.connect();
-	client.query('SELECT * FROM datosturbidez;', (err, res) => {
-	  if (err) throw err;
-	  for (let row of res.rows) {
-	    console.log(JSON.stringify(row));
-	  }
-	  //client.end();
 	});
 });
 
@@ -103,12 +96,14 @@ app.post('/posted', function(req, res) {
 	dato = parseInt(req.body.valor);
 	
 	//convertimos al tiempo colombiano manteniendo la referencia UTC
-	tiempo.setTime(tiempo.getTime() - 5*60*60*1000)
+	//tiempo.setTime(tiempo.getTime() - 5*60*60*1000)
 
 	//escribo al CSV
+	/*
 	fs.writeFile("assets/datos.csv", '\n' + dato + ';' + tiempo.getTime(), { flag: "a" }, ()=>{
 		console.log("Este es el dato: " + dato)
 	});
+	*/
 
 	//escribo a la DB
 	//client.connect();
@@ -166,7 +161,7 @@ app.get('/grafica', function(req, res) {
     client.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
 		if (err) throw err;
 		for (let row of res.rows) {
-			console.log(row);
+			//console.log(row);
 			chartData.unshift('{t: new Date('+ 
     			row.tiempo + 
     			')' +
