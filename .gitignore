@@ -12,3 +12,6 @@ assets
 # Docker
 Dockerfile
 docker-compose.yml
+
+#Queries examples
+DB_queries_examples

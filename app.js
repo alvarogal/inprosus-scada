@@ -134,6 +134,8 @@ app.get('/grafica', function(req, res) {
 	var csvData = [];
 	var chartData = [];
 
+	// se leen datos desde csv
+	/*
 	fs.createReadStream(path.resolve(__dirname, 'assets', 'datos.csv'))
     .pipe(csv.parse({ delimiter: ';' }))
     .on('error', error => console.error(error))
@@ -158,11 +160,21 @@ app.get('/grafica', function(req, res) {
     		tiempoI.setTime(csvData[count][1]); 		
     	}
     });
+	*/
 
+    //se leen datos de la DB para enviar a grafica
+    client.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
+		if (err) throw err;
+		for (let row of res.rows) {
+			console.log(row);
+			chartData.unshift('{t: new Date("'+ 
+    			row[1] + 
+    			'")' +
+    			",y: " + row[0] + '}');
+ 		}
+	});
 
-    //tiempo.setTime(time)
-    //var fecha = tiempo.toUTCString();
-
+    //se envian datos a grafica
 	fs.readFile('graficaPage.html', "utf-8", function(err, data) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
