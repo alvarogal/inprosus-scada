@@ -168,9 +168,9 @@ app.get('/grafica', function(req, res) {
 		for (let row of res.rows) {
 			console.log(row);
 			chartData.unshift('{t: new Date("'+ 
-    			row[1] + 
+    			row.tiempo + 
     			'")' +
-    			",y: " + row[0] + '}');
+    			",y: " + row.valor + '}');
  		}
 	});
 
