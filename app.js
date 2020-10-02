@@ -4,9 +4,11 @@ var fs = require('fs')
 const path = require('path');
 const csv = require('@fast-csv/parse');
 const { Client } = require('pg');
+const { Pool } = require('pg');
 //var parse = require('@fast-csv/parse')
 
 //Conexion a la DB
+/*
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -14,9 +16,14 @@ const client = new Client({
   }
   //ssl: process.env.DATABASE_URL ? true : false
 });
-
 client.connect();
+*/
 
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || 'postgres://tngsqrukcqwxtz:d251142aacd2295b822332608c5e8519a56d08e7e4ee89b0e4c12b316ad2e0d8@ec2-23-20-168-40.compute-1.amazonaws.com:5432/d8emk5v8m18fas',
+    ssl: process.env.DATABASE_URL ? true : false
+})
+pool.connect();
 //Prueba para ver
 /*
 client.query('SELECT * FROM datosturbidez;', (err, res) => {
@@ -107,10 +114,12 @@ app.post('/posted', function(req, res) {
 
 	//escribo a la DB
 	//client.connect();
-	client.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
+	//client.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
+	pool.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
 		dato + ',' + tiempo.getTime() +
 		');', (err, res) => {
 	  if (err) throw err;
+	  console.log("Este es el dato: " + dato);
 	  //console.log(res);
 	  //client.end();
 	});
@@ -125,57 +134,35 @@ app.post('/posted', function(req, res) {
 	res.send(reply);
 });
 
-app.get('/grafica', function(req, res) {
-	var csvData = [];
-	var chartData = [];
+function loadChartData() {
+	var chartData = []
+	pool.query(
+		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
+			if (err) throw err;
+			for (let row of res.rows) {
+				//console.log(row);
+				chartData.unshift('{t: new Date(' +
+					row.tiempo +
+					')' +
+					",y: " + row.valor + '}');
+			}
+		});
+	return chartData;
+}
 
-	// se leen datos desde csv
-	/*
-	fs.createReadStream(path.resolve(__dirname, 'assets', 'datos.csv'))
-    .pipe(csv.parse({ delimiter: ';' }))
-    .on('error', error => console.error(error))
-    .on('data', row => {
-    	csvData.push(row)
-    	console.log(row)
-    })
-    .on('end', rowCount => {
-    	console.log(`Parsed ${rowCount} rows`)
-    	var tiempoF = new Date();
-    	var tiempoI = new Date();
-    	var count = csvData.length-1;
-    	
-    	tiempoF.setTime(csvData[count][1]);
-    	tiempoI.setTime(csvData[count][1]);
-    	while((tiempoF.getTime() - tiempoI.getTime() < 4*3600000 ) && count > 0){
-    		chartData.unshift('{t: new Date("'+ 
-    			tiempoI.toJSON().replace("T", " ").replace("Z", "").substr(0, 19) + 
-    			'")' +
-    			",y: " + csvData[count][0] + '}');
-    		count = count - 1;
-    		tiempoI.setTime(csvData[count][1]); 		
-    	}
-    });
-	*/
+app.get('/grafica', async function (req, res) {
 
-    //se leen datos de la DB para enviar a grafica
-    client.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
-		if (err) throw err;
-		for (let row of res.rows) {
-			//console.log(row);
-			chartData.unshift('{t: new Date('+ 
-    			row.tiempo + 
-    			')' +
-    			",y: " + row.valor + '}');
- 		}
-	});
+	//esperamos para leer datos de DB
+	let promise = Promise.resolve(loadChartData());
+	let chartData = await promise;
 
-    //se envian datos a grafica
-	fs.readFile('graficaPage.html', "utf-8", function(err, data) {
+	//se envian datos a grafica
+	fs.readFile('graficaPage.html', "utf-8", function (err, data) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
-		});	
-        //var result = data.replace('{chartData}', JSON.stringify(chartData));
-        var result = data.replace('{chartData}', '['+chartData+']');
+		});
+		//var result = data.replace('{chartData}', JSON.stringify(chartData));
+		var result = data.replace('{chartData}', '[' + chartData + ']');
 		res.write(result);
 		res.end();
 	});
