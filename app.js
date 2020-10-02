@@ -1,6 +1,7 @@
 var express = require('express')
 var fs = require('fs')
 const { Pool } = require('pg');
+const { promisify } = require('util');
 //var parse = require('@fast-csv/parse')
 
 const pool = new Pool({
@@ -83,26 +84,33 @@ app.post('/posted', function(req, res) {
 });
 
 function loadChartData() {
-	var chartData = []
+	var data = []
 	pool.query(
 		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
 			if (err) throw err;
 			for (let row of res.rows) {
 				//console.log(row);
-				chartData.unshift('{t: new Date(' +
+				data.unshift('{t: new Date(' +
 					row.tiempo +
 					')' +
 					",y: " + row.valor + '}');
 			}
 		});
-	return chartData;
+	if (data.length > 0)
+		return Promise.resolve(data);
+	else
+		return Promise.reject(new Error("Datos de la DB no cargados"));
 }
 
 app.get('/grafica', async function (req, res) {
 
 	//esperamos para leer datos de DB
-	let promise = Promise.resolve(loadChartData());
-	let chartData = await promise;
+	let chartData
+	try{
+		chartData = await loadChartData();
+	}catch(err){
+		console.log("ERROR: app.js line 106: cargando los datos desde la DB ", err);
+	}
 
 	//se envian datos a grafica
 	fs.readFile('graficaPage.html', "utf-8", function (err, data) {
