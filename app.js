@@ -120,15 +120,17 @@ app.get('/grafica', function (req, res) {
 					')' +
 					",y: " + row.valor + '}');
 			}
-			//se envian datos a grafica
-			fs.readFile('graficaPage.html', "utf-8", function (err, data) {
-				res.writeHead(200, {
-					'Content-Type': 'text/html'
-				});
-				var result = data.replace('{chartData}', '[' + chartData + ']');
-				res.write(result);
-				res.end();
+			
+		});
+
+		//se envian datos a grafica
+		fs.readFile('graficaPage.html', "utf-8", function (err, data) {
+			res.writeHead(200, {
+				'Content-Type': 'text/html'
 			});
+			var result = data.replace('{chartData}', '[' + chartData + ']');
+			res.write(result);
+			res.end();
 		});
 	/*loadChartData()
 		.then((response) => {
