@@ -85,9 +85,9 @@ app.post('/posted', function (req, res) {
 app.get('/grafica', function (req, res) {
 	var chartData = [];
 	//esperamos para leer datos de DB
-	pool.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
-		if (err) throw err;
-		for (let row of res.rows) {
+	pool.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (errordb, response) => {
+		if (errordb) throw err;
+		for (let row of response.rows) {
 			//console.log(row);
 			chartData.unshift('{t: new Date(' +
 				row.tiempo +
