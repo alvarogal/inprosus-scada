@@ -1,7 +1,6 @@
 var express = require('express')
 var fs = require('fs')
 const { Pool } = require('pg');
-//var parse = require('@fast-csv/parse')
 
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL || 'postgres://tngsqrukcqwxtz:d251142aacd2295b822332608c5e8519a56d08e7e4ee89b0e4c12b316ad2e0d8@ec2-23-20-168-40.compute-1.amazonaws.com:5432/d8emk5v8m18fas',
