@@ -23,6 +23,7 @@ var server = app.listen(port, function () {
 	console.log("app listening at %s:%s Port", host, port)
 });
 
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 //Response with the form when he makes a get with browser
 app.get('/', function (req, res) {
 	fs.readFile('indexPage.html', function (err, data) {
