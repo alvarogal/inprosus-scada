@@ -5,8 +5,8 @@ const { promisify } = require('util');
 //var parse = require('@fast-csv/parse')
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgres://tngsqrukcqwxtz:d251142aacd2295b822332608c5e8519a56d08e7e4ee89b0e4c12b316ad2e0d8@ec2-23-20-168-40.compute-1.amazonaws.com:5432/d8emk5v8m18fas',
-    ssl: process.env.DATABASE_URL ? true : false
+	connectionString: process.env.DATABASE_URL || 'postgres://tngsqrukcqwxtz:d251142aacd2295b822332608c5e8519a56d08e7e4ee89b0e4c12b316ad2e0d8@ec2-23-20-168-40.compute-1.amazonaws.com:5432/d8emk5v8m18fas',
+	ssl: process.env.DATABASE_URL ? true : false
 })
 pool.connect();
 
@@ -16,18 +16,18 @@ app.use(express.urlencoded())
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 8000;
+	port = 8000;
 }
 
-var server = app.listen(port, function() {
+var server = app.listen(port, function () {
 	var host = server.address().address
 	var port = server.address().port
 	console.log("app listening at %s:%s Port", host, port)
 });
 
 //Response with the form when he makes a get with browser
-app.get('/', function(req, res) {
-	fs.readFile('indexPage.html', function(err, data) {
+app.get('/', function (req, res) {
+	fs.readFile('indexPage.html', function (err, data) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
 		});
@@ -37,8 +37,8 @@ app.get('/', function(req, res) {
 });
 
 //Define actions to take when user click submit
-app.post('/thank', function(req, res) {
-	
+app.post('/thank', function (req, res) {
+
 	lines = req.body.bigText.split('\n');
 	filter = req.body.filterText;
 
@@ -46,7 +46,7 @@ app.post('/thank', function(req, res) {
 	reply = "<body>";
 	reply += "<h1>The lines are: </h1>";
 	for (var i = 0; i < lines.length; i++) {
-		if (lines[i].indexOf(filter) != -1){
+		if (lines[i].indexOf(filter) != -1) {
 			reply += "<p>" + lines[i] + "</p>";
 		}
 	}
@@ -54,27 +54,27 @@ app.post('/thank', function(req, res) {
 	res.send(reply);
 });
 
-app.get('/datos', function(req, res) {
-	fs.readFile('paginaPost.html', function(err, data) {
+app.get('/datos', function (req, res) {
+	fs.readFile('paginaPost.html', function (err, data) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
-		});	
+		});
 		res.write(data);
 		res.end();
 	});
 });
 
-app.post('/posted', function(req, res) {
+app.post('/posted', function (req, res) {
 	var tiempo = new Date();
 
 	dato = parseInt(req.body.valor);
 
-	pool.query('INSERT INTO datosturbidez(valor,tiempo) VALUES ('+
+	pool.query('INSERT INTO datosturbidez(valor,tiempo) VALUES (' +
 		dato + ',' + tiempo.getTime() +
 		');', (err, res) => {
-	  if (err) throw err;
-	  console.log("Este es el dato: " + dato);
-	});
+			if (err) throw err;
+			console.log("Este es el dato: " + dato);
+		});
 
 	var reply = '';
 	reply = "<body>";
@@ -83,8 +83,10 @@ app.post('/posted', function(req, res) {
 	res.send(reply);
 });
 
+/*
 function loadChartData() {
-	var data = []
+	var chartData;
+	chartData = [];
 	pool.query(
 		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
 			if (err) throw err;
@@ -96,30 +98,62 @@ function loadChartData() {
 					",y: " + row.valor + '}');
 			}
 		});
-	if (data.length > 0)
-		return Promise.resolve(data);
-	else
-		return Promise.reject(new Error("Datos de la DB no cargados"));
-}
-
-app.get('/grafica', async function (req, res) {
-
-	//esperamos para leer datos de DB
-	let chartData
-	try{
-		chartData = await loadChartData();
-	}catch(err){
-		console.log("ERROR: app.js line 106: cargando los datos desde la DB ", err);
+	if (data.length > 0) {
+		return Promise.resolve();
+	} else {
+		const error = new Error("No lectura de la DB");
+		return Promise.reject(error);
 	}
+}*/
 
-	//se envian datos a grafica
-	fs.readFile('graficaPage.html', "utf-8", function (err, data) {
-		res.writeHead(200, {
-			'Content-Type': 'text/html'
+app.get('/grafica', function (req, res) {
+	var chartData = [];
+	//esperamos para leer datos de DB
+	pool.query(
+		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
+
+			if (err) throw err;
+			for (let row of res.rows) {
+				//console.log(row);
+				chartData.unshift('{t: new Date(' +
+					row.tiempo +
+					')' +
+					",y: " + row.valor + '}');
+			}
+			//se envian datos a grafica
+			fs.readFile('graficaPage.html', "utf-8", function (err, data) {
+				res.writeHead(200, {
+					'Content-Type': 'text/html'
+				});
+				var result = data.replace('{chartData}', '[' + chartData + ']');
+				res.write(result);
+				res.end();
+			});
 		});
-		//var result = data.replace('{chartData}', JSON.stringify(chartData));
-		var result = data.replace('{chartData}', '[' + chartData + ']');
-		res.write(result);
-		res.end();
-	});
+	/*loadChartData()
+		.then((response) => {
+			console.log(response);
+			//se envian datos a grafica
+			fs.readFile('graficaPage.html', "utf-8", function (err, data) {
+				res.writeHead(200, {
+					'Content-Type': 'text/html'
+				});
+				var result = data.replace('{chartData}', '[' + chartData + ']');
+				res.write(result);
+				res.end();
+			});
+		})
+		.catch(err => {
+			console.log(err);
+			//se envia pagina de error
+			res.writeHead(200, {
+				'Content-Type': 'text/html'
+			});
+			var result = "<body>" +
+				"<p>A ocurrido un error</p>" +
+				"<body/>";
+			res.write(result);
+			res.end();
+		});
+		*/
 });
