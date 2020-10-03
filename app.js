@@ -82,79 +82,27 @@ app.post('/posted', function (req, res) {
 	res.send(reply);
 });
 
-/*
-function loadChartData() {
-	var chartData;
-	chartData = [];
-	pool.query(
-		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
-			if (err) throw err;
-			for (let row of res.rows) {
-				//console.log(row);
-				data.unshift('{t: new Date(' +
-					row.tiempo +
-					')' +
-					",y: " + row.valor + '}');
-			}
-		});
-	if (data.length > 0) {
-		return Promise.resolve();
-	} else {
-		const error = new Error("No lectura de la DB");
-		return Promise.reject(error);
-	}
-}*/
-
 app.get('/grafica', function (req, res) {
 	var chartData = [];
 	//esperamos para leer datos de DB
-	pool.query(
-		'select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
+	pool.query('select * from datosturbidez where tiempo > ((select max(tiempo) from datosturbidez)-4*3600000);', (err, res) => {
+		if (err) throw err;
+		for (let row of res.rows) {
+			//console.log(row);
+			chartData.unshift('{t: new Date(' +
+				row.tiempo +
+				')' +
+				",y: " + row.valor + '}');
+		}
+	});
 
-			if (err) throw err;
-			for (let row of res.rows) {
-				//console.log(row);
-				chartData.unshift('{t: new Date(' +
-					row.tiempo +
-					')' +
-					",y: " + row.valor + '}');
-			}
-			
+	//se envian datos a grafica
+	fs.readFile('graficaPage.html', "utf-8", function (err, data) {
+		res.writeHead(200, {
+			'Content-Type': 'text/html'
 		});
-
-		//se envian datos a grafica
-		fs.readFile('graficaPage.html', "utf-8", function (err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/html'
-			});
-			var result = data.replace('{chartData}', '[' + chartData + ']');
-			res.write(result);
-			res.end();
-		});
-	/*loadChartData()
-		.then((response) => {
-			console.log(response);
-			//se envian datos a grafica
-			fs.readFile('graficaPage.html', "utf-8", function (err, data) {
-				res.writeHead(200, {
-					'Content-Type': 'text/html'
-				});
-				var result = data.replace('{chartData}', '[' + chartData + ']');
-				res.write(result);
-				res.end();
-			});
-		})
-		.catch(err => {
-			console.log(err);
-			//se envia pagina de error
-			res.writeHead(200, {
-				'Content-Type': 'text/html'
-			});
-			var result = "<body>" +
-				"<p>A ocurrido un error</p>" +
-				"<body/>";
-			res.write(result);
-			res.end();
-		});
-		*/
+		var result = data.replace('{chartData}', '[' + chartData + ']');
+		res.write(result);
+		res.end();
+	});
 });
