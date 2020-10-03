@@ -1,7 +1,6 @@
 var express = require('express')
 var fs = require('fs')
 const { Pool } = require('pg');
-const { promisify } = require('util');
 //var parse = require('@fast-csv/parse')
 
 const pool = new Pool({
